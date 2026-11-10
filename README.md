@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # projeto_estacionamento
 
 A new Flutter project.
@@ -15,3 +16,6 @@ A few resources to get you started if this is your first Flutter project:
 For help getting started with Flutter development, view the
 [online documentation](https://docs.flutter.dev/), which offers tutorials,
 samples, guidance on mobile development, and a full API reference.
+=======
+Parte mobile do projeto do estacionamento.
+>>>>>>> e945e684f8842d2e89599ab52d5197488733b100
