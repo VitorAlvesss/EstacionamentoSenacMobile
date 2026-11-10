@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "703208443366",
+    "firebase_url": "https://estacionamento-24758-default-rtdb.firebaseio.com",
+    "project_id": "estacionamento-24758",
+    "storage_bucket": "estacionamento-24758.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:703208443366:android:4f8bdbe7b257c4cb539a27",
+        "android_client_info": {
+          "package_name": "com.example.projeto_estacionamento"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCGyzjTXqD9Yz-LQrVzh07TWqYi3REJog"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
