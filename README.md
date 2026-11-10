@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # projeto_estacionamento
 
 A new Flutter project.
