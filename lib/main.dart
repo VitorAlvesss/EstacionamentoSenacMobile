@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'pages/cadastro_usuario.dart';
 import 'firebase_options.dart';
 
 Future<void> main() async {
@@ -32,7 +31,7 @@ class AppEstacionamento extends StatelessWidget{
         ),
       ),
 
-      home: const CadastroUsuario(),
+      //home: aqui precisaria ser a tela de login... talvez
     );
   }
 }
