@@ -1,20 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+void main() {
   runApp(const AppEstacionamento());
 }
 
-class AppEstacionamento extends StatelessWidget{
+class AppEstacionamento extends StatelessWidget {
   const AppEstacionamento({super.key});
 
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
 
@@ -31,7 +25,7 @@ class AppEstacionamento extends StatelessWidget{
         ),
       ),
 
-      //home: aqui precisaria ser a tela de login... talvez
+      //home: aqui precisaria ser a tela de login... talvez (ou coloca alguma outra, só pra teste)
     );
   }
 }
