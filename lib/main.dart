@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+//import 'pages/editarDadosPage.dart';
+
 void main() {
   runApp(const AppEstacionamento());
 }
@@ -25,7 +27,7 @@ class AppEstacionamento extends StatelessWidget {
         ),
       ),
 
-      //home: aqui precisaria ser a tela de login... talvez (ou coloca alguma outra, só pra teste)
+      home: null,
     );
   }
 }
