@@ -30,6 +30,18 @@ class _EditarDadosPage extends State<EditarDadosPage> {
   final AppDatabase appDB = AppDatabase();
   final UsuarioRepository repo = UsuarioRepository();
 
+  bool verificarCampo(String valorInicial, String valorComparacao) {
+    if (valorInicial != valorComparacao) {
+      return false;
+    }
+
+    if (valorInicial.isEmpty) {
+      return false;
+    }
+
+    return true;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -111,15 +123,21 @@ class _EditarDadosPage extends State<EditarDadosPage> {
                   ElevatedButton.icon(
                     onPressed: () async {
                       try {
-                        final campoNome = nomeController.text.isEmpty
+                        final campoNome =
+                            verificarCampo(nomeController.text, widget.nome)
                             ? null
                             : nomeController.text.trim();
-                        final campoEmail = emailController.text.isEmpty
+                        final campoEmail =
+                            verificarCampo(emailController.text, widget.email)
                             ? null
                             : emailController.text.trim();
-                        final campoTelefone = telefoneController.text.isEmpty
+                        final campoTelefone =
+                            verificarCampo(
+                              telefoneController.text,
+                              widget.telefone,
+                            )
                             ? null
-                            : emailController.text.trim();
+                            : telefoneController.text.trim();
                         final campoSenha = senhaController.text.isEmpty
                             ? null
                             : senhaController.text.trim();
