@@ -1,17 +1,36 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import '../features/repositories/usuario_repository.dart';
 
 class EditarDadosPage extends StatefulWidget {
+  final int id;
   final String nome;
   final String email;
 
-  const EditarDadosPage({super.key, required this.nome, required this.email});
+  const EditarDadosPage({super.key, required this.id, required this.nome, required this.email});
 
   @override
   State<EditarDadosPage> createState() => _EditarDadosPage();
 }
 
 class _EditarDadosPage extends State<EditarDadosPage> {
+  
+  final nomeController = TextEditingController();
+  final emailController = TextEditingController();
+  final senhaController = TextEditingController();
+  final confirmarSenhaController = TextEditingController();
+
+  final AppDatabase appDB = AppDatabase();
+  final UsuarioRepository repo = UsuarioRepository();
+
+  @override
+  void initState() {
+  	super.initState();
+  	nomeController.text = widget.nome;
+  	emailController.text = widget.email;
+  }
+
+
   @override
   Widget build(BuildContext ctx) {
     return Scaffold(
@@ -24,7 +43,7 @@ class _EditarDadosPage extends State<EditarDadosPage> {
               // nome
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: widget.nome,
+                controller: nomeController,
               ),
             ),
 
@@ -34,7 +53,7 @@ class _EditarDadosPage extends State<EditarDadosPage> {
               // email
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
-                hintText: widget.email,
+                controller: emailController,
               ),
             ),
 
@@ -44,6 +63,7 @@ class _EditarDadosPage extends State<EditarDadosPage> {
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Sua nova senha',
+                controller: senhaController,
               ),
             ),
 
@@ -53,6 +73,7 @@ class _EditarDadosPage extends State<EditarDadosPage> {
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Confirme sua nova senha',
+                controller: confirmarSenhaController,
               ),
             ),
 
@@ -76,7 +97,34 @@ class _EditarDadosPage extends State<EditarDadosPage> {
                     ),
                   ),
                   ElevatedButton.icon(
-                    onPressed: () {},
+                    onPressed: () async {
+                    	try {
+                    		final campoNome = nomeController.text.isEmpty ? null : nomeController.text.trim();
+                    		final campoEmail = emailController.text.isEmpty ? null : emailController.text.trim();
+                    		final campoSenha = senhaController.text.isEmpty ? null : senhaController.text.trim();
+
+                    		if (senhaController.text != confirmarSenhaController.text) {
+                    			if (!mounted) return;
+
+								ScaffoldMessenger.of(
+	                    			ctx, 
+	                    		).showSnackBar(SnackBar(content: Text('As senhas precisam ser iguais')));
+	                    		return;            			
+                    		}
+                    		int rows = await repo.updateUsuario(widget.id, campoNome, campoEmail, campoSenha);
+                    		if (!mounted) return;
+
+                    		ScaffoldMessenger.of(
+                    			ctx, 
+                    		).showSnackBar(SnackBar(content: Text('Dados atualizados!')));
+                    	} catch (e) {
+                    		if (!mounted) return;
+
+                    		ScaffoldMessenger.of(
+                    			ctx, 
+                    		).showSnackBar(SnackBar(content: Text('ERRO: $e')));
+                    		}
+                    }, 
                     icon: Icon(Icons.edit),
                     label: const Text('Salvar alterações'),
                     style: ElevatedButton.styleFrom(
