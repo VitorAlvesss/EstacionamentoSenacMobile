@@ -1,0 +1,9 @@
+{
+  "DB_HOST": "10.0.2.2",
+  "DB_PORT": 3306,
+  "DB_USER": "app_mobile",
+  "DB_PASSWORD": "troque_aqui",
+  "DB_NAME": "estacionamentoSenac",
+  "DB_SSL": true,
+  "DB_SSL_ACEITAR_CERT_INVALIDO": true
+}

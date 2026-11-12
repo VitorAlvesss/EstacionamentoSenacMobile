@@ -43,3 +43,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Credenciais do banco (copie config/banco.example.json para config/banco.json)
+config/banco.json

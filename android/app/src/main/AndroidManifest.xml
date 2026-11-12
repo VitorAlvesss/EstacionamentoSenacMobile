@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Necessário para o app acessar o banco MySQL pela rede -->
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="projeto_estacionamento"
         android:name="${applicationName}"
