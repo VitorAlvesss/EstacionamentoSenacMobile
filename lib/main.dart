@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:projeto_estacionamento/pages/Pagamento.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: '.env');
   runApp(const AppEstacionamento());
 }
 
@@ -25,7 +29,7 @@ class AppEstacionamento extends StatelessWidget {
         ),
       ),
 
-      //home: aqui precisaria ser a tela de login... talvez (ou coloca alguma outra, só pra teste)
+      home: const PagamentoScreen(),
     );
   }
 }

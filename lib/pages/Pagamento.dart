@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class PagamentoScreen extends StatefulWidget {
-  const PagamentoScreen({Key? key}) : super(key: key);
+  const PagamentoScreen({super.key});
 
   @override
   State<PagamentoScreen> createState() => _PagamentoScreenState();
@@ -15,7 +15,7 @@ class _PagamentoScreenState extends State<PagamentoScreen> {
       'proprietario': 'Juliana Ferreira',
       'saida': '20/05/2024 13:02',
       'permanencia': '01h47min',
-      'valor': 'R 14,00',
+      'valor': 'R\$ 14,00',
       'formaPagamento': 'Cartão de Débito',
       'vaga': 'A01 - Setor A',
     },
@@ -24,7 +24,7 @@ class _PagamentoScreenState extends State<PagamentoScreen> {
       'proprietario': 'Lucas Martins',
       'saida': '20/05/2024 12:55',
       'permanencia': '00h45min',
-      'valor': 'R 8,00',
+      'valor': 'R\$ 8,00',
       'formaPagamento': 'Dinheiro',
       'vaga': 'B02 - Setor B',
     },
@@ -33,7 +33,7 @@ class _PagamentoScreenState extends State<PagamentoScreen> {
       'proprietario': 'Rafael Souza',
       'saida': '20/05/2024 11:30',
       'permanencia': '02h15min',
-      'valor': 'R 20,00',
+      'valor': 'R\$ 20,00',
       'formaPagamento': 'PIX',
       'vaga': 'C05 - Setor C',
     },
@@ -124,21 +124,21 @@ drawer: Drawer(
             // Cards de Resumo Financeiro
             _buildResumoCard(
               title: 'Total de ganho hoje',
-              value: 'R 0,00',
+              value: 'R\$ 0,00',
               icon: Icons.payments,
               color: Colors.green,
             ),
             const SizedBox(height: 12),
             _buildResumoCard(
               title: 'Total de ganho no mês',
-              value: 'R 0,00',
+              value: 'R\$ 0,00',
               icon: Icons.calendar_month,
               color: Colors.blue,
             ),
             const SizedBox(height: 12),
             _buildResumoCard(
               title: 'Pagamentos pendentes',
-              value: '0',
+              value: ' 0',
               icon: Icons.pending_actions,
               color: Colors.red,
             ),
