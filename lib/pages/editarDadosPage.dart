@@ -109,15 +109,19 @@ class _EditarDadosPage extends State<EditarDadosPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  ElevatedButton.icon(
+                  OutlinedButton.icon(
                     onPressed: () {
                       Navigator.pop(ctx);
                     },
                     icon: Icon(Icons.arrow_back),
                     label: const Text('Cancelar'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: Colors.black,
+                      backgroundColor: const Color(0xFF070A12),
+                      foregroundColor: Colors.pinkAccent,
+                      side: const BorderSide(
+						color: Colors.pinkAccent,
+						width: 1.5,
+                      ),
                     ),
                   ),
                   ElevatedButton.icon(
@@ -176,7 +180,7 @@ class _EditarDadosPage extends State<EditarDadosPage> {
                     icon: Icon(Icons.edit),
                     label: const Text('Salvar alterações'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.indigo,
+                      backgroundColor: const Color(0xFF7C3AED), 
                       foregroundColor: Colors.white,
                     ),
                   ),
@@ -188,9 +192,7 @@ class _EditarDadosPage extends State<EditarDadosPage> {
       ),
       appBar: AppBar(
         title: const Text('Editar dados do usuário'),
-        backgroundColor: Colors.white,
       ),
-      backgroundColor: Colors.white,
     );
   }
 }
