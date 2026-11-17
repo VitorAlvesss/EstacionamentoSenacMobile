@@ -18,4 +18,21 @@ class PagamentoRepository {
       return false;
     }
   }
+
+
+  //select tabela pagamento (BANCO)
+  Future<List<Map<String, Object>>> selectPagamento() async {
+    try {
+      final conn = await AppDatabase().connection;
+      final resultado = await conn.execute(
+        'SELECT * FROM pagamentos',
+      );
+
+      return resultado.rows
+        .map((linha) => Map<String,Object>.from(linha.assoc()))
+        .toList();
+    } catch (e) {
+      return [];
+    }
+  }
 }
