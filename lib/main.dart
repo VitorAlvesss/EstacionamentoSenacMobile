@@ -1,31 +1,30 @@
 import 'package:flutter/material.dart';
+import 'pagina/login_usuario.dart';
 
 void main() {
-  runApp(const AppEstacionamento());
+  runApp(const MyApp());
 }
 
-class AppEstacionamento extends StatelessWidget {
-  const AppEstacionamento({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Estacionamento Senac',
 
-      title: 'App Estacionamento',
+      initialRoute: '/',
 
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigo,
-            foregroundColor: Colors.white,
-          ),
+      routes: {
+        '/': (context) => LoginUsuario(
+          aoCadastrar: () {
+            Navigator.pushNamed(context, '/cadastro');
+          },
         ),
-      ),
 
-      //home: aqui precisaria ser a tela de login... talvez (ou coloca alguma outra, só pra teste)
+        '/cadastro': (context) => const LoginUsuario(),
+      },
     );
   }
 }
