@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:projeto_estacionamento/pages/Pagamento.dart';
+import 'package:projeto_estacionamento/core/ui.dart';
+import 'package:projeto_estacionamento/pages/Calculo.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,23 +14,45 @@ class AppEstacionamento extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: AppColors.navy,
+      brightness: Brightness.light,
+    ).copyWith(primary: AppColors.navy);
+
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-
       title: 'App Estacionamento',
-
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.indigo,
-
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.indigo,
+        useMaterial3: true,
+        colorScheme: colorScheme,
+        scaffoldBackgroundColor: AppColors.background,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.navy,
+          foregroundColor: Colors.white,
+          centerTitle: false,
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        filledButtonTheme: FilledButtonThemeData(
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.navy,
             foregroundColor: Colors.white,
+            minimumSize: const Size.fromHeight(58),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(18),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),
-
-      home: const PagamentoScreen(),
+      home: const ParkCalculatorScreen(),
     );
   }
 }
