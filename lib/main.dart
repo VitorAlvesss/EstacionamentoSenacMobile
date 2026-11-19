@@ -170,7 +170,7 @@ class _TelaCalculadoraState extends State<TelaCalculadora> {
       bottomNavigationBar: BottomAction(
         label: 'Avançar para Pagamento',
         onPressed: () => Navigator.push(context,
-            MaterialPageRoute(builder: (_) => PaymentScreen(total: total))),
+            MaterialPageRoute(builder: (_) => TelaPagamento(total: total))),
       ),
     );
   }
@@ -189,27 +189,27 @@ class _TariffRow extends StatelessWidget {
       );
 }
 
-// ---------- TELA 2 ----------
+// Segunda tela
 
-enum PayMethod { pix, credit, debit }
+enum FormaPagamento { pix, credit, debit }
 
-class PaymentScreen extends StatefulWidget {
+class TelaPagamento extends StatefulWidget {
   final double total;
-  const PaymentScreen({super.key, required this.total});
+  const TelaPagamento({super.key, required this.total});
   @override
-  State<PaymentScreen> createState() => _PaymentScreenState();
+  State<TelaPagamento> createState() => _TelaPagamentoState();
 }
 
-class _PaymentScreenState extends State<PaymentScreen> {
-  PayMethod method = PayMethod.pix;
+class _TelaPagamentoState extends State<TelaPagamento> {
+  FormaPagamento method = FormaPagamento.pix;
 
   static const _options = {
-    PayMethod.pix: (Icons.qr_code_2, 'Pix', 'Aprovação instantânea'),
-    PayMethod.credit: (Icons.credit_card, 'Cartão de Crédito', 'Pague na maquininha'),
-    PayMethod.debit: (Icons.payment, 'Cartão de Débito', 'Débito em conta'),
+    FormaPagamento.pix: (Icons.qr_code_2, 'Pix', 'Aprovação instantânea'),
+    FormaPagamento.credit: (Icons.credit_card, 'Cartão de Crédito', 'Pague na maquininha'),
+    FormaPagamento.debit: (Icons.payment, 'Cartão de Débito', 'Débito em conta'),
   };
 
-  void _pay() => showDialog(
+  void _pagar() => showDialog(
         context: context,
         barrierDismissible: false,
         builder: (ctx) => AlertDialog(
@@ -286,7 +286,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
         ),
       ]),
       bottomNavigationBar:
-          BottomAction(label: 'Efetuar Pagamento', onPressed: _pay),
+          BottomAction(label: 'Efetuar Pagamento', onPressed: _pagar),
     );
   }
 }
