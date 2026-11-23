@@ -3,7 +3,7 @@
 /// As telas (lib/pages) só precisam deste import:
 ///   import 'package:projeto_estacionamento/features/features.dart';
 ///
-/// - [UsuarioController.instancia] -> login, sessão, logout
+/// - [UsuarioController.instancia] -> login, cadastro, sessão, logout
 /// - [VagaController.instancia]    -> vagas disponíveis (listar, resumo, tempo real)
 /// - [Validadores]                 -> validator: dos TextFormField
 /// - [BackendException]            -> todo erro vem assim, com `.mensagem` pronta

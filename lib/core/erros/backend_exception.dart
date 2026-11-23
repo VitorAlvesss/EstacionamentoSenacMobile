@@ -10,6 +10,10 @@ enum CodigoErro {
   muitasTentativas('Muitas tentativas. Aguarde um pouco e tente novamente'),
   naoAutenticado('Você precisa estar logado para continuar'),
 
+  // ---- Cadastro ----
+  emailEmUso('Este e-mail já está em uso'),
+  telefoneEmUso('Este telefone já está em uso'),
+
   // ---- Vagas ----
   vagaNaoEncontrada('Vaga não encontrada'),
 

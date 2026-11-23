@@ -1,4 +1,4 @@
-# Backend do app mobile (Login + Vagas)
+# Backend do app mobile (Login + Cadastro + Vagas)
 
 O app fala **direto com o MySQL** usando o pacote `mysql_client_plus`. O banco é
 o mesmo do projeto web (`estacionamentoSenac`), então **quem já tem conta no web
@@ -72,59 +72,54 @@ Regras (as mesmas do login do web):
 
 `Usuario` tem: `id`, `nome`, `primeiroNome`, `email`, `telefone`, `ativo`.
 
-### Tela de login (o modelo do Firebase, trocado para o nosso backend)
+### Tela de login — `lib/pages/login_page.dart` (já ligada)
 
-Só mudam o `validator` dos campos e o `_entrar()`. O resto da tela continua igual.
+A tela de login já chama o backend. O que ela faz:
 
 ```dart
 Future<void> _entrar() async {
-  if (!_formKey.currentState!.validate() || _carregando) return;
+  if (_carregando || !_formKey.currentState!.validate()) return;
   setState(() => _carregando = true);
-
   try {
     await UsuarioController.instancia.entrar(
-      login: _emailController.text,
+      login: _loginController.text,
       senha: _senhaController.text,
     );
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const HomePage()),
+      MaterialPageRoute(builder: (_) => const InicioPage()),
     );
   } on BackendException catch (erro) {
-    if (mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(erro.mensagem)));
-    }
+    if (mounted) mostrarMensagem(context, erro.mensagem, erro: true);
   } finally {
     if (mounted) setState(() => _carregando = false);
   }
 }
 
 // Nos campos:
-TextFormField(controller: _emailController, validator: Validadores.login, ...)
-TextFormField(controller: _senhaController, validator: Validadores.senhaLogin, ...)
+CampoFormulario(controller: _loginController, validator: Validadores.login, ...)
+CampoFormulario(controller: _senhaController, validator: Validadores.senhaLogin, ...)
 ```
 
-Não precisa mais do `_mensagemDeErro(...)`: `erro.mensagem` já vem pronta
+Não precisa de `_mensagemDeErro(...)`: `erro.mensagem` já vem pronta
 ("E-mail ou senha incorretos", "Sem conexão com o servidor…", etc.).
 
-### Manter logado ao abrir o app (`main.dart`)
+O link **"Não tem conta? Cadastre-se"** abre o cadastro. Quando o cadastro dá
+certo, a tela de cadastro fecha devolvendo o e-mail, e o login já aparece com
+o e-mail preenchido e a mensagem "Cadastro realizado!".
 
-```dart
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  Usuario? usuario;
-  try {
-    usuario = await UsuarioController.instancia.restaurarSessao();
-  } on BackendException {
-    usuario = null; // qualquer problema: vai para o login
-  }
-  runApp(AppEstacionamento(logado: usuario != null));
-}
-// no MaterialApp: home: logado ? const HomePage() : const LoginPage(),
-```
+Depois do login o app vai para `lib/pages/inicio_page.dart`, uma tela
+**provisória** (nome do usuário + vagas livres em tempo real + botão Sair).
+Quando a Home do time existir, troque `InicioPage` por ela em `login_page.dart`
+e `main.dart`.
 
-Botão de sair:
+### Manter logado ao abrir o app (`main.dart`, já feito)
+
+A primeira tela é a `TelaAbertura`: ela chama `restaurarSessao()` mostrando um
+carregando e vai para o início (se já estava logado) ou para o login. Qualquer
+erro (banco fora do ar, faltou o `banco.json`…) leva para o login.
+
+Botão de sair (já está na `InicioPage`):
 
 ```dart
 await UsuarioController.instancia.sair();
@@ -134,7 +129,71 @@ Navigator.of(context).pushAndRemoveUntil(
 
 ---
 
-## 3. Vagas — `VagaController.instancia`
+## 3. Cadastro — `UsuarioController.instancia.cadastrar(...)`
+
+É o `criar` do `usuarioController.js` do web (`POST /usuarios`), mesma tabela.
+
+| Web (`POST /usuarios`) | Mobile |
+|---|---|
+| body `{ nome_usuario, email, numero_usuario, senha }` | `cadastrar(nome:, email:, telefone:, senha:)` → `Usuario` |
+| 400 "Nome, e-mail e senha são obrigatórios" | `CodigoErro.dadosInvalidos` com a mensagem do campo |
+| 400 "A senha deve ter no mínimo 6 caracteres" | idem (mesma regra: mínimo 6) |
+| 409 "Este e-mail já está em uso." | `CodigoErro.emailEmUso` |
+| — (o banco recusava com erro 500) | `CodigoErro.telefoneEmUso` (`numero_usuario` também é UNIQUE) |
+| `bcrypt.hash(senha, ...)` | bcrypt **custo 12** (o `CUSTO_BCRYPT` do login do web), em outra thread |
+| 201 `{ id_usuario }` | devolve o `Usuario` criado (com o `id`) |
+
+Regras:
+- nome, e-mail e senha obrigatórios; telefone **opcional no backend** (como no
+  web) — a tela exige com `Validadores.telefone`;
+- nome: espaços extras são removidos, máximo 120 caracteres (`VARCHAR(120)`);
+- e-mail: gravado em minúsculo, máximo 120;
+- telefone: com DDD (10 ou 11 dígitos), gravado **só com os números**
+  (`11988887777`), que é como o login por telefone procura;
+- senha: mínimo 6, máximo 72 (limite do bcrypt), gravada só como hash;
+- **o app nunca envia o `cargo`**: todo cadastro feito no celular é `usuario`
+  (o DEFAULT da tabela). Administrador só se cria pelo web;
+- o cadastro **não faz login sozinho** — igual ao web, volta para o login;
+- se duas pessoas cadastrarem o mesmo e-mail no mesmo instante, o UNIQUE do
+  banco barra a segunda e ela recebe "Este e-mail já está em uso".
+
+### Tela de cadastro — `lib/pages/cadastro_usuario.dart` (já ligada)
+
+É a tela da branch `telaDeCadastroDeUsuario` (mesmo visual laranja), agora
+gravando no banco:
+
+```dart
+Future<void> salvarUsuario() async {
+  if (carregando || !formKey.currentState!.validate()) return;
+  setState(() => carregando = true);
+  try {
+    final usuario = await UsuarioController.instancia.cadastrar(
+      nome: nomeController.text,
+      email: emailController.text,
+      telefone: telefoneController.text, // pode vir com a máscara
+      senha: senhaController.text,
+    );
+    if (!mounted) return;
+    Navigator.of(context).pop(usuario.email); // volta para o login
+  } on BackendException catch (erro) {
+    if (mounted) mostrarMensagem(context, erro.mensagem, erro: true);
+  } finally {
+    if (mounted) setState(() => carregando = false);
+  }
+}
+```
+
+Validadores dos campos: `Validadores.nome`, `Validadores.email`,
+`Validadores.telefone`, `Validadores.senhaCadastro` (as mesmas regras que o
+backend confere).
+
+As duas telas usam os componentes de `lib/pages/componentes/visual_formulario.dart`
+(`CabecalhoCurvo`, `CartaoFormulario`, `CampoFormulario`, `BotaoPrincipal`,
+`mostrarMensagem`, `CoresApp`) — use-os nas próximas telas para manter o visual.
+
+---
+
+## 4. Vagas — `VagaController.instancia`
 
 O app é **só para usuário comum**: aqui é **somente consulta** das vagas.
 Cadastrar vaga e mudar ocupação continuam no web/sensores.
@@ -213,7 +272,7 @@ final livres = await VagaController.instancia.listarLivres();
 
 ---
 
-## 4. Erros
+## 5. Erros
 
 Todo erro sai como `BackendException` com `.mensagem` pronta para mostrar e
 `.codigo` para a tela decidir o que fazer:
@@ -224,8 +283,11 @@ Todo erro sai como `BackendException` com `.mensagem` pronta para mostrar e
 | `usuarioDesativado` | conta com `ativo = 0` |
 | `muitasTentativas` | 5 erros seguidos (aguardar 30 s) |
 | `naoAutenticado` | ação exige login → mande para a tela de login |
+| `emailEmUso` | cadastro com e-mail que já existe |
+| `telefoneEmUso` | cadastro com telefone que já existe |
 | `vagaNaoEncontrada` | id de vaga inexistente |
 | `dadosInvalidos` | campo vazio/formato inválido |
+| `registroDuplicado` | o banco recusou um valor repetido (UNIQUE) |
 | `semConexao` | sem internet / servidor fora do ar |
 | `bancoIndisponivel` | banco recusou (usuário/senha do banco errados etc.) |
 | `configuracaoAusente` | faltou o `--dart-define-from-file` |
@@ -235,7 +297,7 @@ derrubar a conexão, a próxima consulta reconecta.
 
 ---
 
-## 5. Segurança — leia antes de publicar o app
+## 6. Segurança — leia antes de publicar o app
 
 Como o app conecta direto no MySQL, **o usuário e a senha do banco vão dentro do
 APK** (dá para extrair). Por isso **não use o `root` nem o usuário do web** no
@@ -245,25 +307,33 @@ app. Crie um usuário só para ele, que só pode o que o app faz:
 CREATE USER 'app_mobile'@'%' IDENTIFIED BY 'uma_senha_forte_aqui';
 GRANT SELECT ON estacionamentoSenac.tbl_usuario TO 'app_mobile'@'%';
 GRANT SELECT ON estacionamentoSenac.tbl_vaga    TO 'app_mobile'@'%';
+-- Cadastro: INSERT só nestas 4 colunas. Sem permissão na coluna "cargo",
+-- o banco sempre usa o DEFAULT 'usuario' -> ninguém cria administrador pelo app.
+GRANT INSERT (nome_usuario, email, numero_usuario, senha)
+  ON estacionamentoSenac.tbl_usuario TO 'app_mobile'@'%';
 FLUSH PRIVILEGES;
 ```
+
+Se o usuário `app_mobile` já existe, rode só o `GRANT INSERT (...)` e o `FLUSH`.
+Sem ele, o cadastro falha com "Não foi possível acessar o banco de dados".
 
 (Quando entrarem veículo, pagamento e editar dados, esse usuário vai precisar
 de mais permissões nessas tabelas — dar só as que cada função usar.)
 
 Mesmo assim, quem extrair essa senha consegue ler a `tbl_usuario` (com os hashes
-bcrypt). Para um app em produção de verdade, o certo é o app chamar uma API (como
-o backend do web) em vez do banco. Para o projeto da disciplina, o usuário
-limitado acima é o recomendado.
+bcrypt) e criar contas comuns. Para um app em produção de verdade, o certo é o
+app chamar uma API (como o backend do web) em vez do banco. Para o projeto da
+disciplina, o usuário limitado acima é o recomendado.
 
 Outros cuidados já tratados no código:
 - todo SQL usa parâmetros (`:id`), nunca texto concatenado → sem SQL Injection;
 - a senha do usuário nunca sai do repository e nunca é salva no celular;
-- a sessão salva no celular guarda só id, nome, e-mail, telefone e cargo.
+- a sessão salva no celular guarda só id, nome, e-mail, telefone e cargo;
+- o cadastro nunca envia `cargo` (sempre usuário comum).
 
 ---
 
-## 6. Estrutura das pastas
+## 7. Estrutura das pastas
 
 ```
 lib/
@@ -279,7 +349,7 @@ lib/
 ├── features/
 │   ├── features.dart                      ← o único import que as telas usam
 │   ├── usuarios/
-│   │   ├── controllers/usuario_controller.dart   ← login, sessão, logout
+│   │   ├── controllers/usuario_controller.dart   ← login, cadastro, sessão, logout
 │   │   ├── repositories/usuario_repository.dart  ← SQL da tbl_usuario
 │   │   ├── repositories/armazenamento_sessao.dart← sessão salva no celular
 │   │   └── models/usuario.dart
@@ -289,7 +359,11 @@ lib/
 │       └── models/vaga.dart, resumo_vagas.dart
 │
 ├── pages/                                 ← telas (front)
-└── main.dart
+│   ├── login_page.dart                    ← login (ligado ao backend)
+│   ├── cadastro_usuario.dart              ← cadastro (ligado ao backend)
+│   ├── inicio_page.dart                   ← tela provisória pós-login
+│   └── componentes/visual_formulario.dart ← cabeçalho, campos e botão laranja
+└── main.dart                              ← abre no login ou já logado
 ```
 
 O caminho de uma chamada é sempre:
@@ -298,7 +372,8 @@ O caminho de uma chamada é sempre:
 Nova funcionalidade (ex.: veículos)? Crie `features/veiculos/` com as mesmas
 três pastas e exporte o controller e os models no `features/features.dart`.
 
-Testes: `flutter test test/features` (rodam sem banco, com um banco falso).
+Testes: `flutter test` (rodam sem banco, com um banco falso; o
+`test/widget_test.dart` testa as telas de login e cadastro).
 
 Tabelas usadas: `tbl_usuario` (`id, nome_usuario, email, numero_usuario, senha,
 cargo, ativo`) e `tbl_vaga` — conforme o
