@@ -54,7 +54,7 @@ class _ParkCalculatorScreenState extends State<ParkCalculatorScreen> {
   void _goToPayment() {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PaymentScreen(totalValue: _total, hours: _hours),
+        builder: (_) => PagamentoScreen(),
       ),
     );
   }
