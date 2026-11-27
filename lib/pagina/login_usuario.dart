@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:mysql_client_plus/mysql_client_plus.dart';
+import 'package:bcrypt/bcrypt.dart';
+import 'package:projeto_estacionamento/pagina/cadastroVeiculo.dart';
+import 'package:projeto_estacionamento/pagina/cadastroUsuario.dart';
 class LoginUsuario extends StatefulWidget {
   final VoidCallback? aoCadastrar;
 
@@ -20,14 +23,89 @@ class _LoginUsuarioState extends State<LoginUsuario> {
 
   bool ocultarSenha = true;
 
-  void entrarUsuario() {
-    if (formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Formulário validado!'),
-          backgroundColor: Colors.green,
+
+  Future<void> entrarUsuario() async {
+    if (!formKey.currentState!.validate()) {
+      return;
+    }
+
+    MySQLConnection? conn;
+
+    try {
+      conn = await MySQLConnection.createConnection(
+        host: "estacionamento-senac-senacsp-e198.g.aivencloud.com",
+        port: 20494,
+        userName: "avnadmin",
+        password: "",
+        databaseName: "estacionamentoSenac",
+      );
+
+      await conn.connect();
+
+      final resultado = await conn.execute(
+        '''
+      SELECT id, senha
+      FROM tbl_usuario
+      WHERE email = :email
+      ''',
+        {
+          'email': emailController.text.trim(),
+        },
+      );
+
+      if (resultado.rows.isEmpty) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('E-mail ou senha incorretos!'),
+          ),
+        );
+        return;
+      }
+
+      final usuario = resultado.rows.first.assoc();
+
+      final idUsuario = int.parse(usuario['id'].toString());
+      final senhaHash = usuario['senha'].toString();
+
+      final senhaCorreta = BCrypt.checkpw(
+        senhaController.text,
+        senhaHash,
+      );
+
+      if (!senhaCorreta) {
+        if (!mounted) return;
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('E-mail ou senha incorretos!'),
+          ),
+        );
+        return;
+      }
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => telaCadastro(
+            idUsuario: idUsuario,
+          ),
         ),
       );
+
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Erro ao fazer login: $e'),
+        ),
+      );
+    } finally {
+      await conn?.close();
     }
   }
 
@@ -306,8 +384,13 @@ class _LoginUsuarioState extends State<LoginUsuario> {
                         style: TextStyle(fontSize: 16),
                       ),
 
-                      TextButton(
-                        onPressed: widget.aoCadastrar,
+                     const SizedBox(height: 30),
+
+                     ElevatedButton(
+                       onPressed: () {
+                       Navigator.push(context, MaterialPageRoute(builder: (context) => CadastroUsuario()));
+
+                      },
 
                         child: Text(
                           'Cadastre-se',
@@ -317,9 +400,10 @@ class _LoginUsuarioState extends State<LoginUsuario> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
+                     ),
                     ],
                   ),
+
                 ),
               ),
             ),
